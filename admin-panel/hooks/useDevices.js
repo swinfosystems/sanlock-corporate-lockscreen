@@ -23,8 +23,7 @@ export function useDevices() {
         .from('devices')
         .select(`
           *,
-          organization:organizations(id, name),
-          user_profiles!current_user_id(id, full_name)
+          organizations(id, name)
         `)
 
       // Filter based on user role
