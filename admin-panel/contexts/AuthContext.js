@@ -3,13 +3,21 @@ import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/router'
 import toast from 'react-hot-toast'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// Only create client if we have valid URLs (not placeholders)
-export const supabase = (supabaseUrl.includes('placeholder') || supabaseKey.includes('placeholder'))
-  ? null
-  : createClient(supabaseUrl, supabaseKey)
+// Debug environment variables
+console.log('Environment check:', {
+  hasUrl: !!supabaseUrl,
+  hasKey: !!supabaseKey,
+  url: supabaseUrl?.substring(0, 30) + '...',
+  key: supabaseKey?.substring(0, 30) + '...'
+})
+
+// Only create client if we have valid environment variables
+export const supabase = (supabaseUrl && supabaseKey)
+  ? createClient(supabaseUrl, supabaseKey)
+  : null
 
 const AuthContext = createContext({})
 
@@ -51,6 +59,7 @@ export const AuthProvider = ({ children }) => {
   const getSession = async () => {
     try {
       if (!supabase) {
+        console.log('No Supabase client available - environment variables missing')
         setLoading(false)
         return
       }
@@ -60,6 +69,8 @@ export const AuthProvider = ({ children }) => {
       
       if (session) {
         await handleSignIn(session)
+      } else {
+        console.log('No active session found')
       }
     } catch (error) {
       console.error('Error getting session:', error)
