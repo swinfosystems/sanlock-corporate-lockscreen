@@ -5,8 +5,12 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/corporate-lockscreen-admin' : '',
-  basePath: process.env.NODE_ENV === 'production' ? '/corporate-lockscreen-admin' : '',
+  // Remove basePath and assetPrefix for Cloudflare Pages
+  env: {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
+  }
 }
 
 module.exports = nextConfig

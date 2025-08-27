@@ -3,10 +3,13 @@ import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/router'
 import toast from 'react-hot-toast'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'YOUR_SUPABASE_URL'
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// Only create client if we have valid URLs (not placeholders)
+export const supabase = (supabaseUrl.includes('placeholder') || supabaseKey.includes('placeholder'))
+  ? null
+  : createClient(supabaseUrl, supabaseKey)
 
 const AuthContext = createContext({})
 
@@ -27,22 +30,31 @@ export const AuthProvider = ({ children }) => {
     // Get initial session
     getSession()
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN') {
-          await handleSignIn(session)
-        } else if (event === 'SIGNED_OUT') {
-          handleSignOut()
+    // Listen for auth changes only if supabase is available
+    let subscription = null
+    if (supabase) {
+      const { data } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (event === 'SIGNED_IN') {
+            await handleSignIn(session)
+          } else if (event === 'SIGNED_OUT') {
+            handleSignOut()
+          }
         }
-      }
-    )
+      )
+      subscription = data
+    }
 
-    return () => subscription.unsubscribe()
+    return () => subscription?.unsubscribe()
   }, [])
 
   const getSession = async () => {
     try {
+      if (!supabase) {
+        setLoading(false)
+        return
+      }
+      
       const { data: { session }, error } = await supabase.auth.getSession()
       if (error) throw error
       
@@ -58,6 +70,11 @@ export const AuthProvider = ({ children }) => {
 
   const handleSignIn = async (session) => {
     try {
+      if (!supabase) {
+        console.warn('Supabase client not available')
+        return
+      }
+      
       // Get user profile with role and permissions
       const { data: profile, error } = await supabase
         .from('user_profiles')
@@ -113,6 +130,11 @@ export const AuthProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     try {
+      if (!supabase) {
+        toast.error('Authentication service not available')
+        return { success: false, error: 'Service unavailable' }
+      }
+      
       setLoading(true)
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -134,6 +156,11 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
+      if (!supabase) {
+        handleSignOut()
+        return
+      }
+      
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       
@@ -146,6 +173,11 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (updates) => {
     try {
+      if (!supabase) {
+        toast.error('Database service not available')
+        return { success: false, error: 'Service unavailable' }
+      }
+      
       const { error } = await supabase
         .from('user_profiles')
         .update(updates)
