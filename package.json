@@ -1,0 +1,36 @@
+{
+  "name": "sanlock-corporate-lockscreen",
+  "version": "1.0.0",
+  "description": "SanLock - Corporate Lockscreen Solution by Sanket Wanve Technologies",
+  "author": "Sanket Wanve Technologies (swt.42web.io)",
+  "license": "MIT",
+  "scripts": {
+    "setup": "npm run setup:api && npm run setup:admin && npm run setup:desktop",
+    "setup:api": "cd api-server && npm install",
+    "setup:admin": "cd admin-panel && npm install",
+    "setup:desktop": "cd desktop-client && npm install",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:admin\"",
+    "dev:api": "cd api-server && npm run dev",
+    "dev:admin": "cd admin-panel && npm run dev",
+    "dev:desktop": "cd desktop-client && npm start",
+    "build": "npm run build:admin",
+    "build:admin": "cd admin-panel && npm run build",
+    "start:api": "cd api-server && npm start",
+    "start:admin": "cd admin-panel && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "sanlock",
+    "lockscreen",
+    "corporate",
+    "remote-access",
+    "security",
+    "free-tier"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/sanlock-corporate-lockscreen.git"
+  }
+}

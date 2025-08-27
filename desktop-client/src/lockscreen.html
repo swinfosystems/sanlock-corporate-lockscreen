@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate Lockscreen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        .lockscreen-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .company-logo {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+        }
+
+        .lockscreen-title {
+            color: white;
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .lockscreen-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .login-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .request-access {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .request-button {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .request-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            display: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="status-indicator">
+        <div class="status-dot"></div>
+        <span>Connected</span>
+    </div>
+
+    <div class="lockscreen-container">
+        <div class="company-logo">🏢</div>
+        <h1 class="lockscreen-title">Corporate Access</h1>
+        <p class="lockscreen-subtitle">Please authenticate to continue</p>
+
+        <form class="login-form" id="loginForm">
+            <div class="input-group">
+                <input type="text" class="form-input" id="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <input type="password" class="form-input" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="login-button" id="loginButton">
+                Sign In
+            </button>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                Authenticating...
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+        </form>
+
+        <div class="request-access">
+            <button class="request-button" id="requestButton">
+                Request Access from Administrator
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        class LockscreenUI {
+            constructor() {
+                this.loginForm = document.getElementById('loginForm');
+                this.loginButton = document.getElementById('loginButton');
+                this.requestButton = document.getElementById('requestButton');
+                this.errorMessage = document.getElementById('errorMessage');
+                this.loading = document.getElementById('loading');
+                
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                this.loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+
+                this.requestButton.addEventListener('click', () => {
+                    this.handleAccessRequest();
+                });
+
+                // Prevent right-click context menu
+                document.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                });
+
+                // Prevent F12 and other dev tools shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'F12' || 
+                        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                        (e.ctrlKey && e.key === 'u')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            async handleLogin() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                if (!username || !password) {
+                    this.showError('Please enter both username and password');
+                    return;
+                }
+
+                this.setLoading(true);
+                this.hideError();
+
+                try {
+                    const result = await ipcRenderer.invoke('authenticate-user', {
+                        username,
+                        password,
+                        deviceId: await this.getDeviceId()
+                    });
+
+                    if (result.success) {
+                        this.handleSuccessfulLogin(result.user);
+                    } else {
+                        this.showError(result.error || 'Authentication failed');
+                    }
+                } catch (error) {
+                    this.showError('Connection error. Please try again.');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            async handleAccessRequest() {
+                this.requestButton.disabled = true;
+                this.requestButton.textContent = 'Requesting...';
+
+                try {
+                    const result = await ipcRenderer.invoke('request-permission', {
+                        deviceId: await this.getDeviceId(),
+                        requestType: 'unlock',
+                        timestamp: new Date().toISOString()
+                    });
+
+                    if (result.success) {
+                        this.requestButton.textContent = 'Request Sent ✓';
+                        setTimeout(() => {
+                            this.requestButton.textContent = 'Request Access from Administrator';
+                            this.requestButton.disabled = false;
+                        }, 3000);
+                    } else {
+                        this.showError('Failed to send request');
+                        this.requestButton.disabled = false;
+                        this.requestButton.textContent = 'Request Access from Administrator';
+                    }
+                } catch (error) {
+                    this.showError('Connection error');
+                    this.requestButton.disabled = false;
+                    this.requestButton.textContent = 'Request Access from Administrator';
+                }
+            }
+
+            handleSuccessfulLogin(user) {
+                // Check user permissions
+                if (user.role === 'superadmin' || user.permissions.includes('unlock-screen')) {
+                    // User has permission to unlock
+                    this.showSuccess('Access granted. Unlocking...');
+                    setTimeout(() => {
+                        ipcRenderer.send('unlock-screen', user);
+                    }, 1000);
+                } else {
+                    this.showError('Insufficient permissions. Contact your administrator.');
+                }
+            }
+
+            setLoading(isLoading) {
+                this.loginButton.disabled = isLoading;
+                this.loading.style.display = isLoading ? 'block' : 'none';
+                this.loginButton.textContent = isLoading ? '' : 'Sign In';
+            }
+
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.style.display = 'block';
+                this.errorMessage.style.color = '#ff6b6b';
+            }
+
+            showSuccess(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.style.display = 'block';
+                this.errorMessage.style.color = '#4ade80';
+            }
+
+            hideError() {
+                this.errorMessage.style.display = 'none';
+            }
+
+            async getDeviceId() {
+                // This would be implemented to get the actual device ID
+                return 'device-id-placeholder';
+            }
+        }
+
+        // Initialize the lockscreen UI
+        new LockscreenUI();
+    </script>
+</body>
+</html>
