@@ -8,7 +8,7 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const { createClient } = require('@supabase/supabase-js');
-const authMiddleware = require('./middleware/auth');
+const { authMiddleware } = require('./middleware/auth');
 const deviceRoutes = require('./routes/devices');
 const authRoutes = require('./routes/auth');
 const permissionRoutes = require('./routes/permissions');
