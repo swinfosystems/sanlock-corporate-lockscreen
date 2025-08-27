@@ -32,24 +32,48 @@ export const SocketProvider = ({ children }) => {
   }, [user])
 
   const initializeSocket = () => {
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'ws://localhost:3001'
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://sanlock-corporate-lockscreen.onrender.com'
     
     const newSocket = io(socketUrl, {
       auth: {
         userId: user.id,
         role: user.role,
         organizationId: user.organization?.id
-      }
+      },
+      transports: ['websocket', 'polling'],
+      upgrade: true,
+      rememberUpgrade: true,
+      timeout: 20000,
+      forceNew: true
     })
 
     newSocket.on('connect', () => {
       setIsConnected(true)
       console.log('Connected to control server')
+      toast.success('Connected to SanLock server')
     })
 
-    newSocket.on('disconnect', () => {
+    newSocket.on('disconnect', (reason) => {
       setIsConnected(false)
-      console.log('Disconnected from control server')
+      console.log('Disconnected from control server:', reason)
+      if (reason === 'io server disconnect') {
+        // Server disconnected the socket, reconnect manually
+        newSocket.connect()
+      }
+    })
+
+    newSocket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error)
+      setIsConnected(false)
+    })
+
+    newSocket.on('reconnect', (attemptNumber) => {
+      console.log('Reconnected after', attemptNumber, 'attempts')
+      toast.success('Reconnected to SanLock server')
+    })
+
+    newSocket.on('reconnect_error', (error) => {
+      console.error('Reconnection failed:', error)
     })
 
     // Device management events

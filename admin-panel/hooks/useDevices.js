@@ -24,14 +24,14 @@ export function useDevices() {
         .select(`
           *,
           organization:organizations(id, name),
-          user_profiles!devices_user_id_fkey(id, full_name, email)
+          user_profiles!current_user_id(id, full_name)
         `)
 
       // Filter based on user role
       if (user.role === 'org_admin') {
         query = query.eq('organization_id', user.organization?.id)
       } else if (user.role === 'user') {
-        query = query.eq('user_id', user.id)
+        query = query.eq('current_user_id', user.id)
       }
       // Superadmins see all devices (no filter)
 
@@ -57,8 +57,7 @@ export function useDevices() {
           device_id: deviceData.deviceId,
           hostname: deviceData.hostname,
           platform: deviceData.platform,
-          arch: deviceData.arch,
-          user_id: deviceData.userId || user.id,
+          current_user_id: deviceData.userId || user.id,
           organization_id: deviceData.organizationId || user.organization?.id,
           status: 'online',
           last_seen: new Date().toISOString(),

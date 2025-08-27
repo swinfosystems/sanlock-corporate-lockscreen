@@ -30,8 +30,11 @@ const io = socketIo(server, {
       "http://localhost:3000",
       "https://sanlock-corporate-lockscreen.pages.dev"
     ],
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  allowEIO3: true,
+  transports: ['websocket', 'polling']
 });
 
 // Security middleware (FREE)
