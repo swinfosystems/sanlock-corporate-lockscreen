@@ -93,12 +93,7 @@ export const AuthProvider = ({ children }) => {
           *,
           organizations (
             id,
-            name,
-            type
-          ),
-          user_roles (
-            role,
-            permissions
+            name
           )
         `)
         .eq('id', session.user.id)
@@ -110,8 +105,8 @@ export const AuthProvider = ({ children }) => {
         id: session.user.id,
         email: session.user.email,
         name: profile.full_name,
-        role: profile.user_roles?.role || 'user',
-        permissions: profile.user_roles?.permissions || [],
+        role: profile.role || 'user',
+        permissions: profile.permissions || [],
         organization: profile.organizations,
         avatar: profile.avatar_url
       }
