@@ -26,7 +26,10 @@ const server = http.createServer(app);
 // Socket.io setup for real-time communication (FREE)
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://sanlock-corporate-lockscreen.pages.dev"
+    ],
     methods: ["GET", "POST"]
   }
 });
@@ -35,7 +38,10 @@ const io = socketIo(server, {
 app.use(helmet());
 app.use(compression()); // Reduce bandwidth usage
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: [
+    "http://localhost:3000",
+    "https://sanlock-corporate-lockscreen.pages.dev"
+  ],
   credentials: true
 }));
 

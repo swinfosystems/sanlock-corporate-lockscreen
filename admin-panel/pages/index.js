@@ -27,29 +27,29 @@ export default function Dashboard() {
       name: 'Connected Devices',
       value: connectedDevices?.length || 0,
       icon: Monitor,
-      color: 'text-primary-600',
-      bgColor: 'bg-primary-50'
+      color: 'text-primary-400',
+      bgColor: 'from-primary-500/20 to-primary-600/30'
     },
     {
       name: 'Online Users',
       value: onlineUsers?.length || 0,
       icon: Users,
-      color: 'text-success-600',
-      bgColor: 'bg-success-50'
+      color: 'text-success-400',
+      bgColor: 'from-success-500/20 to-success-600/30'
     },
     {
       name: 'Locked Screens',
       value: connectedDevices?.filter(d => d.status === 'locked').length || 0,
       icon: Shield,
-      color: 'text-danger-600',
-      bgColor: 'bg-danger-50'
+      color: 'text-danger-400',
+      bgColor: 'from-danger-500/20 to-danger-600/30'
     },
     {
       name: 'Active Sessions',
       value: connectedDevices?.filter(d => d.remoteSession).length || 0,
       icon: Activity,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
+      color: 'text-purple-400',
+      bgColor: 'from-purple-500/20 to-purple-600/30'
     }
   ]
 
@@ -81,36 +81,45 @@ export default function Dashboard() {
     <Layout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Corporate Lockscreen Dashboard
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Welcome back, {user.name} ({user.role})
-            </p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-success-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-600">System Online</span>
+        <div className="header-gradient p-8 rounded-2xl mb-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">
+                <span className="sanlock-brand">SanLock</span> Dashboard
+              </h1>
+              <p className="text-dark-300 text-lg">
+                Welcome back, <span className="text-primary-400 font-semibold">{user.name}</span> 
+                <span className="ml-2 px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm font-medium">
+                  {user.role}
+                </span>
+              </p>
+            </div>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-success-400 rounded-full animate-pulse shadow-lg shadow-success-400/50"></div>
+                <span className="text-dark-200 font-medium">System Online</span>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-dark-400">v1.0.0</div>
+                <div className="text-xs text-dark-500">Sanket Wanve Technologies</div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat) => {
             const Icon = stat.icon
             return (
-              <div key={stat.name} className="card">
-                <div className="flex items-center">
-                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`h-6 w-6 ${stat.color}`} />
+              <div key={stat.name} className="stat-card group cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-dark-400 text-sm font-medium mb-2">{stat.name}</p>
+                    <p className="text-3xl font-bold text-white mb-1">{stat.value}</p>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${stat.bgColor} group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon className={`h-8 w-8 ${stat.color}`} />
                   </div>
                 </div>
               </div>
@@ -119,17 +128,13 @@ export default function Dashboard() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
+        <div className="glass-card p-2 mb-8">
+          <nav className="flex space-x-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
               >
                 {tab.name}
               </button>
