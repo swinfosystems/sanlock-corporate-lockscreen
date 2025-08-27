@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useSocket } from '../contexts/SocketContext'
+import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
 import DeviceGrid from '../components/DeviceGrid'
 import RemoteControl from '../components/RemoteControl'
@@ -9,10 +10,17 @@ import Analytics from '../components/Analytics'
 import { Monitor, Users, Shield, Activity } from 'lucide-react'
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const { connectedDevices, onlineUsers } = useSocket()
   const [activeTab, setActiveTab] = useState('devices')
   const [selectedDevice, setSelectedDevice] = useState(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [user, loading, router])
 
   const stats = [
     {
@@ -52,15 +60,19 @@ export default function Dashboard() {
     { id: 'analytics', name: 'Analytics', component: Analytics }
   ]
 
-  if (!user) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-gray-300">Loading...</p>
         </div>
       </div>
     )
+  }
+
+  if (!user) {
+    return null // Will redirect to login
   }
 
   const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component
