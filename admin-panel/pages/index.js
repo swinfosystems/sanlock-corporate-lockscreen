@@ -10,10 +10,16 @@ import Analytics from '../components/Analytics'
 import { Monitor, Users, Shield, Activity } from 'lucide-react'
 
 export default function Dashboard() {
-  const { user, loading } = useAuth()
+  const { user, loading, supabase } = useAuth()
   const { connectedDevices, onlineUsers } = useSocket()
   const [activeTab, setActiveTab] = useState('devices')
   const [selectedDevice, setSelectedDevice] = useState(null)
+  const [realTimeStats, setRealTimeStats] = useState({
+    totalDevices: 0,
+    totalUsers: 0,
+    totalOrganizations: 0,
+    activeConnections: 0
+  })
   const router = useRouter()
 
   useEffect(() => {
@@ -22,31 +28,57 @@ export default function Dashboard() {
     }
   }, [user, loading, router])
 
+  useEffect(() => {
+    if (user && supabase) {
+      loadRealTimeStats()
+    }
+  }, [user, supabase])
+
+  const loadRealTimeStats = async () => {
+    try {
+      // Load real statistics from database
+      const [devicesResult, usersResult, orgsResult] = await Promise.all([
+        supabase.from('devices').select('id', { count: 'exact' }),
+        supabase.from('user_profiles').select('id', { count: 'exact' }),
+        supabase.from('organizations').select('id', { count: 'exact' })
+      ])
+
+      setRealTimeStats({
+        totalDevices: devicesResult.count || 0,
+        totalUsers: usersResult.count || 0,
+        totalOrganizations: orgsResult.count || 0,
+        activeConnections: connectedDevices?.length || 0
+      })
+    } catch (error) {
+      console.error('Error loading real-time stats:', error)
+    }
+  }
+
   const stats = [
     {
-      name: 'Connected Devices',
-      value: connectedDevices?.length || 0,
+      name: 'Total Devices',
+      value: realTimeStats.totalDevices,
       icon: Monitor,
       color: 'text-primary-400',
       bgColor: 'from-primary-500/20 to-primary-600/30'
     },
     {
-      name: 'Online Users',
-      value: onlineUsers?.length || 0,
+      name: 'Total Users',
+      value: realTimeStats.totalUsers,
       icon: Users,
       color: 'text-success-400',
       bgColor: 'from-success-500/20 to-success-600/30'
     },
     {
-      name: 'Locked Screens',
-      value: connectedDevices?.filter(d => d.status === 'locked').length || 0,
+      name: 'Organizations',
+      value: realTimeStats.totalOrganizations,
       icon: Shield,
-      color: 'text-danger-400',
-      bgColor: 'from-danger-500/20 to-danger-600/30'
+      color: 'text-warning-400',
+      bgColor: 'from-warning-500/20 to-warning-600/30'
     },
     {
-      name: 'Active Sessions',
-      value: connectedDevices?.filter(d => d.remoteSession).length || 0,
+      name: 'Active Connections',
+      value: connectedDevices?.length || 0,
       icon: Activity,
       color: 'text-purple-400',
       bgColor: 'from-purple-500/20 to-purple-600/30'
@@ -79,29 +111,31 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="header-gradient p-8 rounded-2xl mb-8">
+      <div className="space-y-8">
+        {/* Welcome Header */}
+        <div className="glass-card p-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-4xl font-bold mb-2">
-                <span className="sanlock-brand">SanLock</span> Dashboard
+              <h1 className="text-3xl font-bold mb-3 text-white">
+                Welcome to <span className="sanlock-brand">SanLock</span>
               </h1>
               <p className="text-dark-300 text-lg">
-                Welcome back, <span className="text-primary-400 font-semibold">{user.name}</span> 
-                <span className="ml-2 px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm font-medium">
+                Corporate Lockscreen Management System
+              </p>
+              <div className="flex items-center mt-4 space-x-4">
+                <span className="text-dark-200">Logged in as:</span>
+                <span className="text-primary-400 font-semibold">{user.name}</span>
+                <span className="px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm font-medium border border-primary-500/30">
                   {user.role}
                 </span>
-              </p>
-            </div>
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-3 h-3 bg-success-400 rounded-full animate-pulse shadow-lg shadow-success-400/50"></div>
-                <span className="text-dark-200 font-medium">System Online</span>
               </div>
-              <div className="text-right">
-                <div className="text-sm text-dark-400">v1.0.0</div>
-                <div className="text-xs text-dark-500">Sanket Wanve Technologies</div>
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-dark-400 mb-1">Version 1.0.0</div>
+              <div className="text-xs text-dark-500">Sanket Wanve Technologies</div>
+              <div className="flex items-center mt-3 space-x-2">
+                <div className="w-2 h-2 bg-success-400 rounded-full animate-pulse"></div>
+                <span className="text-success-400 text-sm font-medium">System Operational</span>
               </div>
             </div>
           </div>
@@ -143,7 +177,7 @@ export default function Dashboard() {
         </div>
 
         {/* Active Tab Content */}
-        <div className="mt-6">
+        <div className="glass-card p-8">
           {ActiveComponent && (
             <ActiveComponent 
               selectedDevice={selectedDevice}
